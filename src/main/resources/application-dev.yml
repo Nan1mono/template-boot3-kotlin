@@ -1,0 +1,35 @@
+server:
+  port: 8250
+
+spring:
+  # 数据库配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.66.130:3306/template_mysql8?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: 123456
+  # 日志编码配置，这里设置为彩色
+  output:
+    ansi:
+      enabled: always
+
+# ORM配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: is_deleted
+      logic-delete-value: 1
+
+# springdoc相关配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+
+
+
+
