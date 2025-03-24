@@ -1,7 +1,9 @@
 package com.project.template.security.filter
 
 import com.project.template.common.cache.CacheManager
+import com.project.template.security.entity.SecurityUserDetail
 import com.project.template.security.exception.enum.AuthFailEnum
+import com.project.template.security.utils.JwtHelper
 import io.swagger.v3.oas.models.PathItem.HttpMethod
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -21,10 +23,10 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 open class PermissionFilter(
 
-    @Value("\${spring.security.allow.uri}")
+    @Value("\${template.token.expiration:25200}")
     private val uri: ArrayList<String>,
-    @Value("\${spring.security.sign}")
-    private val sign:String,
+    @Value("\${template.token.sign-key:nan1mono}")
+    private val sign: String,
     cacheManager: CacheManager
 ) : OncePerRequestFilter() {
 
@@ -48,16 +50,28 @@ open class PermissionFilter(
             return
         }
         // 2、token校验，判断token是否正确，是否过期
-        val token = request.getHeader("Authorization")
+        val token = request.getHeader("Authorization").replace("Bearer ", "")
         // 2.1、如果token不存在，触发异常
         if (StringUtils.isBlank(token)) {
             throw BadCredentialsException(
-                String.format(
-                    "[%s]-%s",
-                    AuthFailEnum.NOT_LOGIN.code,
-                    AuthFailEnum.NOT_LOGIN.message
-                )
+                String.format("[%s]-%s", AuthFailEnum.NOT_LOGIN.code, AuthFailEnum.NOT_LOGIN.message)
             )
+        }
+        // 2.2、校验token：发行人+签名+过期时间
+        if (!JwtHelper.verify(token, sign)) {
+            throw BadCredentialsException(
+                String.format("[%s]-%s", AuthFailEnum.TOKEN_VERIFY_FAIL.code, AuthFailEnum.TOKEN_VERIFY_FAIL.message)
+            )
+        }
+        // 2.3、通过token获取userId，并从缓存中获取用户信息
+        val userId = JwtHelper.getUserId(token)
+        val userDetail = (cacheTemplate[userId.toString()]
+            ?: throw BadCredentialsException(
+                String.format("[%s]-%s", AuthFailEnum.NOT_LOGIN.code, AuthFailEnum.NOT_LOGIN.message)
+            )).run { this as SecurityUserDetail }
+        // 验证用户是否被锁定
+        if (!userDetail.isAccountNonLocked){
+            // TODO date: 2025年3月24日    description: 处理账户被锁定时的异常
         }
     }
 

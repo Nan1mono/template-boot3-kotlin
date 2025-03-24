@@ -18,7 +18,7 @@ abstract class CacheTemplate {
      * @param [key] 钥匙
      * @return [Any?]
      */
-    abstract fun get(key: String): Any?
+    abstract operator fun get(key: String): Any?
 
     /**
      * 获取并转换为指定对象

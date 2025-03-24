@@ -99,8 +99,8 @@ class JwtHelper {
         /**
          * 获取用户ID
          */
-        fun getUserId(token: String): Any? {
-            return decrypt(token)[USER_ID]
+        fun getUserId(token: String): Long {
+            return JWT.decode(token).subject.toLong()
         }
 
         /**

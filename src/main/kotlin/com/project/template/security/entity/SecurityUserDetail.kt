@@ -51,5 +51,13 @@ class SecurityUserDetail(
         return user.status == UserStatusEnum.ENABLED.code
     }
 
+    /**
+     * 帐户是否未锁定，true-未锁定，false-已锁定
+     * @return [Boolean]
+     */
+    override fun isAccountNonLocked(): Boolean {
+        return user.status == UserStatusEnum.ENABLED.code
+    }
+
 
 }
