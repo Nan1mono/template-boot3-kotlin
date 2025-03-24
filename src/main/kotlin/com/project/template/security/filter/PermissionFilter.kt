@@ -1,6 +1,7 @@
 package com.project.template.security.filter
 
-import com.project.template.security.exception.enum.AuthExceptionEnum
+import com.project.template.common.cache.CacheManager
+import com.project.template.security.exception.enum.AuthFailEnum
 import io.swagger.v3.oas.models.PathItem.HttpMethod
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -19,15 +20,17 @@ import org.springframework.web.filter.OncePerRequestFilter
  */
 @Component
 open class PermissionFilter(
-    /**
-     * 不需要过滤的路由地址
-     */
+
     @Value("\${spring.security.allow.uri}")
-    private val uri: ArrayList<String>
+    private val uri: ArrayList<String>,
+    @Value("\${spring.security.sign}")
+    private val sign:String,
+    cacheManager: CacheManager
 ) : OncePerRequestFilter() {
 
     private val matcher = AntPathMatcher()
 
+    private val cacheTemplate = cacheManager.createTemplate()
 
     /**
      * 核心过滤方法
@@ -51,12 +54,11 @@ open class PermissionFilter(
             throw BadCredentialsException(
                 String.format(
                     "[%s]-%s",
-                    AuthExceptionEnum.NOT_LOGIN.code,
-                    AuthExceptionEnum.NOT_LOGIN.message
+                    AuthFailEnum.NOT_LOGIN.code,
+                    AuthFailEnum.NOT_LOGIN.message
                 )
             )
         }
-        // 验证token
     }
 
 }

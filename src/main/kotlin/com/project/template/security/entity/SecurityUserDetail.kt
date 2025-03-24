@@ -2,7 +2,7 @@ package com.project.template.security.entity
 
 import com.project.template.module.system.entity.User
 import com.project.template.security.constant.UserStatusEnum
-import com.project.template.security.exception.enum.AuthExceptionEnum
+import com.project.template.security.exception.enum.AuthFailEnum
 import org.apache.commons.lang3.StringUtils
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -22,8 +22,8 @@ class SecurityUserDetail(
             throw SecurityException(
                 String.format(
                     "[%s]-%s",
-                    AuthExceptionEnum.USER_PASSWORD_EMPTY.code,
-                    AuthExceptionEnum.USER_PASSWORD_EMPTY.message
+                    AuthFailEnum.USER_PASSWORD_EMPTY.code,
+                    AuthFailEnum.USER_PASSWORD_EMPTY.message
                 )
             )
         }
@@ -35,8 +35,8 @@ class SecurityUserDetail(
             throw SecurityException(
                 String.format(
                     "[%s]-%s",
-                    AuthExceptionEnum.USER_USERNAME_EMPTY.code,
-                    AuthExceptionEnum.USER_USERNAME_EMPTY.message
+                    AuthFailEnum.USER_USERNAME_EMPTY.code,
+                    AuthFailEnum.USER_USERNAME_EMPTY.message
                 )
             )
         }
