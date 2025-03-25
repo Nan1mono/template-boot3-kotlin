@@ -63,7 +63,7 @@ class JwtHelper {
             try {
                 return JWT.decode(token).claims
             } catch (e: JWTDecodeException) {
-                log.error("{}-{}", AuthFailEnum.TOKEN_DECODE_FAIL.code, AuthFailEnum.TOKEN_DECODE_FAIL.message)
+                log.error(AuthFailEnum.TOKEN_DECODE_FAIL.buildMessage())
                 return Maps.newHashMap()
             }
         }
@@ -84,14 +84,14 @@ class JwtHelper {
                     if (expiresAt != null && expiresAt.before(Date())) {
                         return true
                     }
-                    log.error("{}:{}", AuthFailEnum.TOKEN_EXPIRED.code, AuthFailEnum.TOKEN_EXPIRED.message)
+                    log.error(AuthFailEnum.TOKEN_EXPIRED.buildMessage())
                     return false
                 }
             } catch (e: JWTVerificationException) {
-                log.error("{}:{}", AuthFailEnum.TOKEN_VERIFY_FAIL.code, AuthFailEnum.TOKEN_VERIFY_FAIL.message)
+                log.error(AuthFailEnum.TOKEN_VERIFY_FAIL.buildMessage())
                 return false
             } catch (e: JWTDecodeException) {
-                log.error("{}:{}", AuthFailEnum.TOKEN_DECODE_FAIL.code, AuthFailEnum.TOKEN_DECODE_FAIL.message)
+                log.error(AuthFailEnum.TOKEN_DECODE_FAIL.buildMessage())
                 return false
             }
         }

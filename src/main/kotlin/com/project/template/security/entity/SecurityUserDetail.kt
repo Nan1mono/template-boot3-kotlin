@@ -19,26 +19,14 @@ class SecurityUserDetail(
 
     override fun getPassword(): String {
         if (StringUtils.isBlank(user.password)) {
-            throw SecurityException(
-                String.format(
-                    "[%s]-%s",
-                    AuthFailEnum.USER_PASSWORD_EMPTY.code,
-                    AuthFailEnum.USER_PASSWORD_EMPTY.message
-                )
-            )
+            throw SecurityException(AuthFailEnum.USER_PASSWORD_EMPTY.buildMessage())
         }
         return user.password!!
     }
 
     override fun getUsername(): String {
         if (StringUtils.isBlank(user.password)) {
-            throw SecurityException(
-                String.format(
-                    "[%s]-%s",
-                    AuthFailEnum.USER_USERNAME_EMPTY.code,
-                    AuthFailEnum.USER_USERNAME_EMPTY.message
-                )
-            )
+            throw SecurityException(AuthFailEnum.USER_USERNAME_EMPTY.buildMessage())
         }
         return user.password!!
     }
