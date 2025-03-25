@@ -2,6 +2,7 @@ server:
   port: 8250
 
 spring:
+
   # 数据库配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -9,12 +10,12 @@ spring:
     url: jdbc:mysql://192.168.66.130:3306/template_mysql8?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useSSL=false
     username: root
     password: 123456
-  # 日志编码配置，这里设置为彩色
-  output:
-    ansi:
-      enabled: always
+  # 配置中心
+  config:
+    activate:
+      on-profile: dev
 
-# ORM配置
+
 mybatis-plus:
   mapper-locations: classpath:mapper/*Mapper.xml
   configuration:
@@ -24,10 +25,28 @@ mybatis-plus:
       logic-delete-field: is_deleted
       logic-delete-value: 1
 
-# springdoc相关配置
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
+
+template:
+  # token配置
+  token:
+    # 加密盐配置(default:nan1mono)
+    sign-key: nan1mono
+    # 过期时间配置(秒)(default:25200)
+    expiration: 86400
+  security:
+    # 是否开启按钮查询权限(default:true)
+    button-enable: true
+    # 路由白名单配置(default:null)
+    allow:
+      uri: /v3/api-docs/**,/swagger-ui/**,/login/auth,/favicon.ico,/test/public/**,/auth/login
+  # 密码试错设定
+  pass-error:
+    # 是否开启试错限制(default:false)
+    enable: true
+    # 试错次数(default:5)
+    times: 10
+    # 试错上限锁定时间（分钟）(default:15)
+    lock-minute: 10
 
 
 

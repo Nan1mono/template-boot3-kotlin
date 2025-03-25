@@ -20,7 +20,7 @@ class LocalCacheHelper {
         private val cache: Cache<String, Any> = CacheBuilder.newBuilder()
             // 写缓存最大并发数
             .concurrencyLevel(0)
-            // 过期时间
+            // 设置默认过期时间
             .expireAfterWrite(7, TimeUnit.DAYS)
             .initialCapacity(10)
             .maximumSize(100)
@@ -76,9 +76,9 @@ class LocalCacheHelper {
          * @param [clazz] 克拉兹
          * @return [T?]
          */
-        fun <T> getIfPresentParse(key:String, clazz: Class<T>): T? {
+        fun <T> getIfPresentParse(key: String, clazz: Class<T>): T? {
             val value = cache.getIfPresent(key)
-            if (ObjectUtils.isEmpty(value) || StringUtils.isBlank(value.toString())){
+            if (ObjectUtils.isEmpty(value) || StringUtils.isBlank(value.toString())) {
                 return null
             }
             return JSON.parseObject(value.toString(), clazz)
@@ -88,7 +88,7 @@ class LocalCacheHelper {
             cache.invalidate(key)
         }
 
-        fun remove(keys:Iterable<String>) {
+        fun remove(keys: Iterable<String>) {
             cache.invalidateAll(keys)
         }
 

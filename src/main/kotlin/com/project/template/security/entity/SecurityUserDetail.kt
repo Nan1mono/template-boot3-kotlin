@@ -1,5 +1,6 @@
 package com.project.template.security.entity
 
+import com.google.common.collect.Lists
 import com.project.template.module.system.entity.User
 import com.project.template.security.constant.UserStatusEnum
 import com.project.template.security.exception.enum.AuthFailEnum
@@ -8,12 +9,24 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
+/**
+ * 安全用户详细信息
+ * @author Lee
+ * @date 2025/03/25
+ * @constructor 创建[SecurityUserDetail]
+ * @param [user] 用户
+ * @param [authorities] 当局
+ */
 class SecurityUserDetail(
-    private val user: User,
-    var token: String,
-    private val authorities: MutableCollection<SimpleGrantedAuthority>
+    var user: User,
+    var token:String = "",
+    private val authorities: Collection<SimpleGrantedAuthority> = Lists.newArrayList(),
+
 ) : UserDetails {
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+
+
+
+    override fun getAuthorities(): Collection<GrantedAuthority> {
         return authorities;
     }
 

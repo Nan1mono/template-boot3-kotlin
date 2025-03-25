@@ -48,8 +48,8 @@ class JwtHelper {
                 .withExpiresAt(Date(System.currentTimeMillis() + expired * 1000))
                 .withClaim(USER_ID, userId)
                 .withClaim(USERNAME, username)
-                .withClaim(NICKNAME, nickName)
-                .withClaim(REAL_NAME, realName)
+                .withClaim(NICKNAME, nickName?:"")
+                .withClaim(REAL_NAME, realName?:"")
                 .sign(Algorithm.HMAC256(sign))
         }
 
