@@ -1,5 +1,6 @@
 package com.project.template.security
 
+import com.project.template.common.cache.RedisUtils
 import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
 import com.project.template.security.core.entity.SecurityUserDetail
@@ -30,7 +31,8 @@ open class SecurityConfig(
     private val uri: ArrayList<String>,
     @Value("\${template.token.sign-key:nan1mono}")
     private val sign: String,
-    private val userService: UserService
+    private val userService: UserService,
+    private val redisUtils: RedisUtils
 ) {
 
     /**
@@ -53,7 +55,7 @@ open class SecurityConfig(
     open fun jwtDecoder(): JwtDecoder {
         val secretKey = SecretKeySpec(sign.toByteArray(), "HmacSHA256")
         return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS256).build()
-            .apply { this.setJwtValidator(JwtIssuerValidator()) }
+            .apply { this.setJwtValidator(JwtIssuerValidator(redisUtils)) }
     }
 
     /**
