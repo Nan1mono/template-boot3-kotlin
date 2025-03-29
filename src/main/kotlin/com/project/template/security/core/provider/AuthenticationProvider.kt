@@ -51,7 +51,7 @@ open class AuthenticationProvider(
 ) : AbstractUserDetailsAuthenticationProvider() {
 
     companion object {
-        private const val LOCKED_KEY = "user:error-pass:error-num:"
+        private const val LOCKED_KEY = "template:auth:user:error-pass:error-num:"
     }
 
     override fun additionalAuthenticationChecks(
@@ -140,7 +140,11 @@ open class AuthenticationProvider(
                 SecurityUtils.buildUserCacheKey(securityUserDetail.user.id),
                 JSON.toJSONString(securityUserDetail)
             )
+        } else {
+            redisUtils.expire(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), tokenExpiration)
         }
+        // 清除redisLock
+        redisUtils.del(LOCKED_KEY + securityUserDetail.user.id)
         return authenticated
     }
 
