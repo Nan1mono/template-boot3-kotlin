@@ -2,6 +2,7 @@ package com.project.template.module.system.service;
 
 import com.project.template.module.system.entity.RoleMenu;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.project.template.module.system.pojo.bo.MenuTreeBO
 
 /**
  * <p>
@@ -11,4 +12,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author lee
  * @since 2025-03-21
  */
-interface RoleMenuService : IService<RoleMenu>
+interface RoleMenuService : IService<RoleMenu>{
+    fun listMenuTreeByRoleIdList(roleIdList: List<Long?>?): List<MenuTreeBO>
+}

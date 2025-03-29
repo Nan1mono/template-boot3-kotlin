@@ -1,4 +1,4 @@
-package com.project.template.security.entity
+package com.project.template.security.core.entity
 
 import com.google.common.collect.Lists
 import com.project.template.module.system.entity.User
@@ -19,29 +19,24 @@ import org.springframework.security.core.userdetails.UserDetails
  */
 class SecurityUserDetail(
     var user: User,
-    var token:String = "",
-    private val authorities: Collection<SimpleGrantedAuthority> = Lists.newArrayList(),
-
+    private var username: String,
+    private var password: String?,
+    var token: String = "",
+    var roleList: ArrayList<SecurityUserRole> = Lists.newArrayList<SecurityUserRole>(),
+    var authorities: ArrayList<SimpleGrantedAuthority> = Lists.newArrayList(),
+    var menuList: ArrayList<SecurityRoleMenu> = Lists.newArrayList()
 ) : UserDetails {
 
-
-
     override fun getAuthorities(): Collection<GrantedAuthority> {
-        return authorities;
+        return authorities
     }
 
     override fun getPassword(): String {
-        if (StringUtils.isBlank(user.password)) {
-            throw SecurityException(AuthFailEnum.USER_PASSWORD_EMPTY.buildMessage())
-        }
-        return user.password!!
+        return password ?: ""
     }
 
     override fun getUsername(): String {
-        if (StringUtils.isBlank(user.password)) {
-            throw SecurityException(AuthFailEnum.USER_USERNAME_EMPTY.buildMessage())
-        }
-        return user.password!!
+        return username
     }
 
     /**
@@ -58,6 +53,11 @@ class SecurityUserDetail(
      */
     override fun isAccountNonLocked(): Boolean {
         return user.status == UserStatusEnum.ENABLED.code
+    }
+
+    fun cleanPassword(){
+        this.user.password = null
+        this.password = null
     }
 
 

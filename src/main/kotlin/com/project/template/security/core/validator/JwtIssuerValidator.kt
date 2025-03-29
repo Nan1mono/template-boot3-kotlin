@@ -1,4 +1,4 @@
-package com.project.template.security.validator
+package com.project.template.security.core.validator
 
 import com.project.template.security.exception.enum.AuthFailEnum
 import org.springframework.security.oauth2.core.OAuth2Error

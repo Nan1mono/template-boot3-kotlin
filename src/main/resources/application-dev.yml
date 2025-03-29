@@ -10,6 +10,13 @@ spring:
     url: jdbc:mysql://192.168.66.130:3306/template_mysql8?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useSSL=false
     username: root
     password: 123456
+  data:
+    # redis
+    redis:
+      password: 123456
+      port: 6379
+      host: 192.168.66.130
+      database: 0
   # 配置中心
   config:
     activate:

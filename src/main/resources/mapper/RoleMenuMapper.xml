@@ -2,4 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.project.template.module.system.mapper.RoleMenuMapper">
 
+    <select id="listMenuTreeByRoleIdList" parameterType="long">
+        SELECT
+        role_menu.menu_id,
+        menu.menu_code,
+        menu.menu_name,
+        menu.parent_id,
+        menu.`level`,
+        menu.path,
+        menu.uri
+        FROM sys_role_menu AS role_menu
+        LEFT JOIN sys_menu AS menu
+        ON role_menu.menu_id = menu.id
+        AND menu.is_deleted = 0
+        WHERE role_menu.is_deleted = 0
+        AND LEVEL = 1
+        <if test="roleIdList != null and roleIdList.size > 0">
+            AND role_menu.role_id IN
+            <foreach collection="roleIdList" item="roleId" open="(" close=")" index="">
+                #{roleId}
+            </foreach>
+        </if>
+        ORDER BY menu.sorted
+    </select>
+
+    <select id="listMenuTreeByParentId" parameterType="long">
+        SELECT
+        menu.id AS menu_id,
+        menu.menu_code,
+        menu.menu_name,
+        menu.parent_id,
+        menu.`level`,
+        menu.path,
+        menu.uri
+        FROM sys_menu AS menu
+        WHERE menu.is_deleted = 0
+        <if test="parentId != null and parentId != ''">
+            AND menu.parent_id = #{parentId}
+        </if>
+        ORDER BY menu.sorted
+    </select>
+
 </mapper>

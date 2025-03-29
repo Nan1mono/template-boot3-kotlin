@@ -2,9 +2,9 @@ package com.project.template.security
 
 import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
-import com.project.template.security.entity.SecurityUserDetail
+import com.project.template.security.core.entity.SecurityUserDetail
 import com.project.template.security.exception.enum.AuthFailEnum
-import com.project.template.security.validator.JwtIssuerValidator
+import com.project.template.security.core.validator.JwtIssuerValidator
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -72,7 +72,7 @@ open class SecurityConfig(
     @Bean
     open fun userDetailsService(): UserDetailsService = UserDetailsService { username ->
         val user = userService.ktQuery().eq(User::username, username).one()
-        user?.let { SecurityUserDetail(it) }
+        user?.let { SecurityUserDetail(it, user.username!!, user.password!!) }
             ?: throw BadCredentialsException(AuthFailEnum.USER_NOT_EXIST.buildMessage())
     }
 

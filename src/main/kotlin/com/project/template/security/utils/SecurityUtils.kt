@@ -1,7 +1,8 @@
 package com.project.template.security.utils
 
 import com.project.template.module.system.entity.User
-import com.project.template.security.entity.SecurityUserDetail
+import com.project.template.security.core.entity.SecurityUserDetail
+import org.apache.commons.lang3.StringUtils
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
@@ -58,7 +59,10 @@ class SecurityUtils {
          * 校验密码是否匹配
          * @return true-匹配，false-不匹配
          */
-        fun matchPassword(rawPassword: String, encodedPassword: String): Boolean {
+        fun matchPassword(rawPassword: String, encodedPassword: String?): Boolean {
+            if (StringUtils.isBlank(encodedPassword)) {
+                return false
+            }
             return PASSWORD_ENCODER.matches(rawPassword, encodedPassword)
         }
 

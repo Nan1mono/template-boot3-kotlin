@@ -20,6 +20,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // MyBatis-Plus
     implementation("com.baomidou:mybatis-plus-spring-boot3-starter:3.5.10.1")
     implementation("com.baomidou:mybatis-plus-jsqlparser-4.9:3.5.10.1")
@@ -43,7 +44,6 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("junit:junit")
     testImplementation(kotlin("test"))
 }
 

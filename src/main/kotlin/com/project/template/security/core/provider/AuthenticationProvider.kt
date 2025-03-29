@@ -1,12 +1,14 @@
-package com.project.template.security.provider
+package com.project.template.security.core.provider
 
-import com.project.template.common.cache.CacheManager
+import com.alibaba.fastjson2.JSON
+import com.project.template.common.cache.RedisUtils
 import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
 import com.project.template.security.constant.UserStatusEnum
-import com.project.template.security.entity.SecurityUserDetail
+import com.project.template.security.core.entity.SecurityUserDetail
 import com.project.template.security.exception.AuthException
 import com.project.template.security.exception.enum.AuthFailEnum
+import com.project.template.security.service.SecurityDataService
 import com.project.template.security.utils.JwtHelper
 import com.project.template.security.utils.SecurityUtils
 import org.springframework.beans.factory.annotation.Value
@@ -44,8 +46,8 @@ open class AuthenticationProvider(
 
     private val userService: UserService,
     private val userDetailsService: UserDetailsService,
-    private val cacheTemplateManager: CacheManager,
-    private val userRoleService: UserDetailsService
+    private val redisUtils: RedisUtils,
+    private val securityDataService: SecurityDataService
 ) : AbstractUserDetailsAuthenticationProvider() {
 
     companion object {
@@ -53,10 +55,27 @@ open class AuthenticationProvider(
     }
 
     override fun additionalAuthenticationChecks(
-        userDetails: UserDetails?,
-        authentication: UsernamePasswordAuthenticationToken?
+        userDetails: UserDetails, authentication: UsernamePasswordAuthenticationToken
     ) {
-        TODO("Not yet implemented")
+        val securityUserDetail = userDetails as SecurityUserDetail
+        // 判断用户是否被删除或者未启用
+        if (securityUserDetail.user.isDeleted == UserStatusEnum.DELETED.code
+            || securityUserDetail.user.status == UserStatusEnum.DISABLED.code
+        ) {
+            throw AuthException(AuthFailEnum.USER_DISABLED_OR_DELETED)
+        }
+        // 判断账号是否已经过期
+        if (securityUserDetail.user.pwdExpirationTime != null && LocalDateTime.now()
+                .isAfter(securityUserDetail.user.pwdExpirationTime)
+        ) {
+            throw AuthException(AuthFailEnum.PASSWORD_EXPIRED)
+        }
+        // 判断账号是否被锁定
+        val locked = securityUserDetail.user.isLocked
+        val lockDatetime = securityUserDetail.user.lockDatetime
+        if (locked == UserStatusEnum.LOCKED.code && lockDatetime != null && LocalDateTime.now().isAfter(lockDatetime)) {
+            throw AuthException(AuthFailEnum.USER_LOCKED)
+        }
     }
 
     /**
@@ -74,18 +93,19 @@ open class AuthenticationProvider(
      * 校验账号密码，状态等
      */
     override fun authenticate(authentication: Authentication): Authentication {
-        val cacheTemplate = cacheTemplateManager.createTemplate()
         // 校验密码，因为登陆时获取的是暗文密码，所以比对时需要将密码加密后比对
         val presentPassword = authentication.credentials.toString()
         val username = authentication.name
         // 数据库查询获取用户信息
         var securityUserDetail = this.retrieveUser(username, authentication as UsernamePasswordAuthenticationToken)
         // 开始匹配密码（加密后）
-        if (!SecurityUtils.matchPassword(securityUserDetail.password, presentPassword)) {
+        if (!SecurityUtils.matchPassword(presentPassword, securityUserDetail.password)) {
             // 如果密码不匹配，将开始进行计数，当达到最大锁定次数时，账号锁定
             this.countPasswordErrorTime(securityUserDetail.user)
             throw AuthException(AuthFailEnum.PASSWORD_ERROR)
         }
+        // 进行状态校验
+        this.additionalAuthenticationChecks(securityUserDetail, authentication)
         // 校验通过，开始签发token
         securityUserDetail = securityUserDetail.apply {
             token = securityUserDetail.user.run {
@@ -99,6 +119,8 @@ open class AuthenticationProvider(
                 )
             }
         }
+        // 获取用户角色信息
+        securityDataService.buildPermission(securityUserDetail)
         // 生成权限信息体
         val authenticated = UsernamePasswordAuthenticationToken.authenticated(
             securityUserDetail,
@@ -106,12 +128,18 @@ open class AuthenticationProvider(
             securityUserDetail.authorities
         )
         // 处于安全考虑将用户密码设置为空
-        securityUserDetail.user.password = null
+        securityUserDetail.cleanPassword()
         // 查询缓存是否存在，如果缓存存在，会刷新过期时间
-        val cacheUserDetail = cacheTemplate.getParse(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), SecurityUserDetail::class.java)
+        val cacheUserDetail = redisUtils.get(
+            SecurityUtils.buildUserCacheKey(securityUserDetail.user.id),
+            SecurityUserDetail::class.java
+        )
         // 如果缓存不存在，则将数据放到缓存中
-        if (cacheUserDetail == null){
-            cacheTemplate.put(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), securityUserDetail)
+        if (cacheUserDetail == null) {
+            redisUtils.set(
+                SecurityUtils.buildUserCacheKey(securityUserDetail.user.id),
+                JSON.toJSONString(securityUserDetail)
+            )
         }
         return authenticated
     }
@@ -130,14 +158,13 @@ open class AuthenticationProvider(
         }
         // 如果未被锁定，开始计算错误次数，错误次数存放在缓存中
         val localKey = LOCKED_KEY + user.id
-        val cacheTemplate = cacheTemplateManager.createTemplate()
         // 缓存中获取错误次数，如果为空，则初始化为0
-        var lockCount = cacheTemplate.getIfPresent(localKey) as? Int ?: 0
+        var lockCount = redisUtils.get(localKey) as? Int ?: 0
         // 当错误次数小于未达到设定好的错误次数时，则继续增加错误次数
         if (lockCount < times) {
             lockCount += 1
-            cacheTemplate.put(localKey, lockCount)
-            return;
+            redisUtils.set(localKey, lockCount, minute * 60)
+            return
         }
         // 如果已经达到上限，清楚所有缓存数据，并锁定账号信息
         userService.ktUpdate().eq(User::id, user.id).apply {
@@ -145,15 +172,7 @@ open class AuthenticationProvider(
             this[User::lockDatetime] = LocalDateTime.now()
         }.update()
         // 清楚缓存数据和context上下文数据
-        cacheTemplate.remove(SecurityUtils.buildUserCacheKey(user.id))
+        redisUtils.del(SecurityUtils.buildUserCacheKey(user.id))
         SecurityUtils.clearUser()
-    }
-
-
-    /**
-     * 查询该用户对应的角色权限
-     */
-    fun findUserRole(securityUserDetail: SecurityUserDetail){
-
     }
 }

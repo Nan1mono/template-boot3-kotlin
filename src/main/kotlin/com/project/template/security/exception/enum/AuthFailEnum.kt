@@ -13,5 +13,7 @@ enum class AuthFailEnum(override val number: Int, override val code: String, ove
     USER_NOT_EXIST(30007, "sec-30007", "用户不存在"),
     PASSWORD_ERROR(3008, "sec-3008", "账号或密码错误"),
     USER_LOCKED(3009, "sec-3009", "用户被锁定"),
+    PASSWORD_EXPIRED(30010, "sec-30010", "密码已过期"),
+    USER_DISABLED_OR_DELETED(30011, "sec-30011", "用户被禁用或已删除"),
     ;
 }
