@@ -1,7 +1,7 @@
-package com.project.template.module.system.service;
+package com.project.template.module.system.service
 
-import com.project.template.module.system.entity.RoleMenu;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.project.template.module.system.entity.RoleMenu
+import com.baomidou.mybatisplus.extension.service.IService
 import com.project.template.module.system.pojo.bo.MenuTreeBO
 
 /**

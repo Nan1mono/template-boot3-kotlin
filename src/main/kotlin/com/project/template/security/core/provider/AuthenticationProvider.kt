@@ -73,7 +73,9 @@ open class AuthenticationProvider(
         // 判断账号是否被锁定
         val locked = securityUserDetail.user.isLocked
         val lockDatetime = securityUserDetail.user.lockDatetime
-        if (locked == UserStatusEnum.LOCKED.code && lockDatetime != null && LocalDateTime.now().isAfter(lockDatetime)) {
+        if (locked == UserStatusEnum.LOCKED.code && lockDatetime != null && LocalDateTime.now()
+                .isBefore(lockDatetime)
+        ) {
             throw AuthException(AuthFailEnum.USER_LOCKED)
         }
     }
@@ -157,7 +159,10 @@ open class AuthenticationProvider(
             return;
         }
         // 判断账号是否已经被锁定，如果已经锁定，不再校验
-        if (user.isLocked == UserStatusEnum.LOCKED.code) {
+        if (user.isLocked == UserStatusEnum.LOCKED.code
+            && user.lockDatetime != null
+            && user.lockDatetime!!.isBefore(LocalDateTime.now())
+        ) {
             throw AuthException(AuthFailEnum.USER_LOCKED)
         }
         // 如果未被锁定，开始计算错误次数，错误次数存放在缓存中
@@ -167,13 +172,13 @@ open class AuthenticationProvider(
         // 当错误次数小于未达到设定好的错误次数时，则继续增加错误次数
         if (lockCount < times) {
             lockCount += 1
-            redisUtils.set(localKey, lockCount, minute * 60)
+            redisUtils.set(localKey, lockCount, 60 * 5)
             return
         }
         // 如果已经达到上限，清楚所有缓存数据，并锁定账号信息
         userService.ktUpdate().eq(User::id, user.id).apply {
             this[User::isLocked] = UserStatusEnum.LOCKED.code
-            this[User::lockDatetime] = LocalDateTime.now()
+            this[User::lockDatetime] = LocalDateTime.now().plusMinutes(minute)
         }.update()
         // 清楚缓存数据和context上下文数据
         redisUtils.del(SecurityUtils.buildUserCacheKey(user.id))

@@ -1,6 +1,5 @@
 package com.project.template.security.core.entity
 
-import com.project.template.module.system.entity.Role
 import io.swagger.v3.oas.annotations.media.Schema
 
 class SecurityUserRole(

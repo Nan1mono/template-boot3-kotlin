@@ -1,4 +1,4 @@
-package com.project.template.module.system.mapper;
+package com.project.template.module.system.mapper
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper
