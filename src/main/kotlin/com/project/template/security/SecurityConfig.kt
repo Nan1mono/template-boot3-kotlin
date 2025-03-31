@@ -4,8 +4,9 @@ import com.project.template.common.cache.RedisUtils
 import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
 import com.project.template.security.core.entity.SecurityUserDetail
-import com.project.template.security.exception.enum.AuthFailEnum
+import com.project.template.security.core.handler.UsernameAuthenticationSuccessHandler
 import com.project.template.security.core.validator.JwtIssuerValidator
+import com.project.template.security.exception.enum.AuthFailEnum
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -34,6 +35,21 @@ open class SecurityConfig(
     private val userService: UserService,
     private val redisUtils: RedisUtils
 ) {
+
+    /**
+     * 登录拦截器
+     */
+    @Bean
+    open fun formLoginFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http.securityMatcher("/auth/login")
+            .authorizeHttpRequests { it.anyRequest().authenticated() }
+            .formLogin {
+                it.loginProcessingUrl("/auth/login")
+                it.successHandler(UsernameAuthenticationSuccessHandler())
+            }
+            .csrf { it.disable() }
+        return http.build()
+    }
 
     /**
      * 设置核心过滤器链

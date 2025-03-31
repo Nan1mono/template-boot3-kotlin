@@ -1,5 +1,6 @@
 package com.project.template.security.utils
 
+import com.alibaba.fastjson2.JSON
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTDecodeException
@@ -8,6 +9,7 @@ import com.auth0.jwt.interfaces.Claim
 import com.google.common.collect.Maps
 import com.project.template.com.project.template.common.log.annotation.Slf4j2
 import com.project.template.com.project.template.common.log.annotation.Slf4j2.Companion.log
+import com.project.template.security.core.entity.SecurityUserDetail
 import com.project.template.security.exception.enum.AuthFailEnum
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
@@ -17,10 +19,13 @@ import java.util.*
 @Slf4j2
 class JwtHelper {
     companion object {
-        private const val USER_ID = "userId"
-        private const val NICKNAME = "nickname"
-        private const val USERNAME = "username"
-        private const val REAL_NAME = "realName"
+        const val USER_ID = "userId"
+        const val NICKNAME = "nickname"
+        const val USERNAME = "username"
+        const val REAL_NAME = "realName"
+        const val ROLE_LIST = "roles"
+        const val CREDENTIALS = "credentials"
+        const val USER_DETAIL = "userDetail"
 
         // 设置发行者
         private const val ISSUER = "template-trust-user"
@@ -36,20 +41,22 @@ class JwtHelper {
          * @return [String]
          */
         fun createToken(
-            userId: Long,
-            username: String,
-            nickName: String?,
-            realName: String?,
+            securityUserDetail: SecurityUserDetail,
             expired: Long,
             sign: String
         ): String {
-            return JWT.create().withSubject(userId.toString())
+            securityUserDetail.user.password = null
+            val userJsonString = JSON.toJSONString(securityUserDetail.user)
+            return JWT.create().withSubject(securityUserDetail.user.id.toString())
                 .withIssuer(ISSUER)
                 .withExpiresAt(Date(System.currentTimeMillis() + expired * 1000))
-                .withClaim(USER_ID, userId)
-                .withClaim(USERNAME, username)
-                .withClaim(NICKNAME, nickName?:"")
-                .withClaim(REAL_NAME, realName?:"")
+                .withClaim(USER_DETAIL, userJsonString)
+                .withClaim(USER_ID, securityUserDetail.user.id)
+                .withClaim(USERNAME, securityUserDetail.user.username)
+                .withClaim(NICKNAME, securityUserDetail.user.nickname ?: "")
+                .withClaim(REAL_NAME, securityUserDetail.user.realName ?: "")
+                .withClaim(ROLE_LIST, securityUserDetail.roleList)
+                .withClaim(CREDENTIALS, securityUserDetail.authorities)
                 .sign(Algorithm.HMAC256(sign))
         }
 
@@ -104,10 +111,10 @@ class JwtHelper {
         }
 
         /**
-         * 获取用户名
+         * 获取
          */
-        fun getUsername(token: String): Any? {
-            return decrypt(token)[USERNAME]
+        fun getClaim(token: String, key: String): Any? {
+            return JWT.decode(token).claims[key]
         }
 
     }

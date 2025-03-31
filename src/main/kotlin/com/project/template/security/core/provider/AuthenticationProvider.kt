@@ -23,6 +23,9 @@ import java.time.LocalDateTime
 /**
  * 核心登录校验与处理器
  * 在这里处理登录的校验，token生成，上下文注册等
+ *
+ * tips：spring security的认证管理器在没有显示指定的provider时，
+ * 会扫描所有AuthenticationProvider的类，并添加到manager中，使其注册成为认证者
  */
 @Component
 open class AuthenticationProvider(
@@ -111,22 +114,15 @@ open class AuthenticationProvider(
         // 校验通过，开始签发token
         securityUserDetail = securityUserDetail.apply {
             token = securityUserDetail.user.run {
-                JwtHelper.createToken(
-                    this.id!!,
-                    this.username!!,
-                    this.nickname,
-                    this.realName,
-                    tokenExpiration,
-                    tokenSignKey
-                )
+                JwtHelper.createToken(securityUserDetail, tokenExpiration, tokenSignKey)
             }
         }
         // 获取用户角色信息
         securityDataService.buildPermission(securityUserDetail)
         // 生成权限信息体
         val authenticated = UsernamePasswordAuthenticationToken.authenticated(
-            securityUserDetail,
-            securityUserDetail.password,
+            securityUserDetail.token,
+            securityUserDetail.token,
             securityUserDetail.authorities
         )
         // 处于安全考虑将用户密码设置为空
@@ -140,7 +136,7 @@ open class AuthenticationProvider(
         if (cacheUserDetail == null) {
             redisUtils.set(
                 SecurityUtils.buildUserCacheKey(securityUserDetail.user.id),
-                JSON.toJSONString(securityUserDetail)
+                JSON.toJSONString(securityUserDetail.token)
             )
         } else {
             redisUtils.expire(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), tokenExpiration)
