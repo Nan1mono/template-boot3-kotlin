@@ -130,7 +130,7 @@ open class AuthenticationProvider(
         val cacheUserDetail = redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id)]
         // 如果缓存不存在，则将数据放到缓存中
         if (cacheUserDetail == null) {
-            redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id)] =  securityUserDetail.token
+            redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), securityUserDetail.token] = tokenExpiration
         } else {
             redisUtils.expire(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), tokenExpiration)
         }
