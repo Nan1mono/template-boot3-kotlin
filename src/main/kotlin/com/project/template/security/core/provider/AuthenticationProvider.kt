@@ -1,6 +1,5 @@
 package com.project.template.security.core.provider
 
-import com.alibaba.fastjson2.JSON
 import com.project.template.common.cache.RedisUtils
 import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
@@ -128,16 +127,10 @@ open class AuthenticationProvider(
         // 处于安全考虑将用户密码设置为空
         securityUserDetail.cleanPassword()
         // 查询缓存是否存在，如果缓存存在，会刷新过期时间
-        val cacheUserDetail = redisUtils.get(
-            SecurityUtils.buildUserCacheKey(securityUserDetail.user.id),
-            SecurityUserDetail::class.java
-        )
+        val cacheUserDetail = redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id)]
         // 如果缓存不存在，则将数据放到缓存中
         if (cacheUserDetail == null) {
-            redisUtils.set(
-                SecurityUtils.buildUserCacheKey(securityUserDetail.user.id),
-                JSON.toJSONString(securityUserDetail.token)
-            )
+            redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id)] =  securityUserDetail.token
         } else {
             redisUtils.expire(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), tokenExpiration)
         }
@@ -164,11 +157,11 @@ open class AuthenticationProvider(
         // 如果未被锁定，开始计算错误次数，错误次数存放在缓存中
         val localKey = LOCKED_KEY + user.id
         // 缓存中获取错误次数，如果为空，则初始化为0
-        var lockCount = redisUtils.get(localKey) as? Int ?: 0
+        var lockCount = redisUtils[localKey]?.toString()?.toIntOrNull() ?: 0
         // 当错误次数小于未达到设定好的错误次数时，则继续增加错误次数
         if (lockCount < times) {
             lockCount += 1
-            redisUtils.set(localKey, lockCount, 60 * 5)
+            redisUtils[localKey] = intArrayOf(lockCount, 60 * 5)
             return
         }
         // 如果已经达到上限，清楚所有缓存数据，并锁定账号信息

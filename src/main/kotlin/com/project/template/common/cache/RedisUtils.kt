@@ -1,7 +1,6 @@
 package com.project.template.common.cache
 
 import com.alibaba.fastjson2.JSON
-import com.alibaba.fastjson2.JSONObject
 import com.project.template.com.project.template.common.log.annotation.Slf4j2
 import com.project.template.com.project.template.common.log.annotation.Slf4j2.Companion.log
 import com.project.template.common.cache.exception.RedisCacheException
@@ -102,7 +101,7 @@ class RedisUtils(
      * @param key 键
      * @return 值
      */
-    fun get(key: String?): Any? {
+    operator fun get(key: String?): Any? {
         return if (key == null || StringUtils.isBlank(key)) {
             null
         } else {
@@ -110,7 +109,7 @@ class RedisUtils(
         }
     }
 
-    fun <T> get(key: String?, clazz: Class<T>): T? {
+    operator fun <T> get(key: String?, clazz: Class<T>): T? {
         val obj = get(key)
         return if (obj == null) null else JSON.parseObject(obj.toString(), clazz)
     }
@@ -122,7 +121,7 @@ class RedisUtils(
      * @param value 值
      * @return true成功 false失败
      */
-    fun set(key: String, value: Any): Boolean {
+    operator fun set(key: String, value: Any): Boolean {
         try {
             redisTemplate.opsForValue()[key] = value
             return true
@@ -140,7 +139,7 @@ class RedisUtils(
      * @param time  时间(秒) time要大于0 如果time小于等于0 将设置无限期
      * @return true成功 false 失败
      */
-    fun set(key: String, value: Any, time: Long): Boolean {
+    operator fun set(key: String, value: Any, time: Long): Boolean {
         try {
             if (time > 0) {
                 redisTemplate.opsForValue()[key, value, time] = TimeUnit.SECONDS

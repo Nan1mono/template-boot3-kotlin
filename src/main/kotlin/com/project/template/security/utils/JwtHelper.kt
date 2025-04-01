@@ -24,8 +24,8 @@ class JwtHelper {
         const val USERNAME = "username"
         const val REAL_NAME = "realName"
         const val ROLE_LIST = "roles"
-        const val CREDENTIALS = "credentials"
-        const val USER_DETAIL = "userDetail"
+        const val AUTHORITIES = "authorities"
+        const val MENUS = "menus"
 
         // 设置发行者
         private const val ISSUER = "template-trust-user"
@@ -46,24 +46,23 @@ class JwtHelper {
             sign: String
         ): String {
             securityUserDetail.user.password = null
-            val userJsonString = JSON.toJSONString(securityUserDetail.user)
             return JWT.create().withSubject(securityUserDetail.user.id.toString())
                 .withIssuer(ISSUER)
                 .withExpiresAt(Date(System.currentTimeMillis() + expired * 1000))
-                .withClaim(USER_DETAIL, userJsonString)
                 .withClaim(USER_ID, securityUserDetail.user.id)
                 .withClaim(USERNAME, securityUserDetail.user.username)
                 .withClaim(NICKNAME, securityUserDetail.user.nickname ?: "")
                 .withClaim(REAL_NAME, securityUserDetail.user.realName ?: "")
                 .withClaim(ROLE_LIST, securityUserDetail.roleList)
-                .withClaim(CREDENTIALS, securityUserDetail.authorities)
+                .withClaim(AUTHORITIES, securityUserDetail.authorities)
+                .withClaim(MENUS, securityUserDetail.menuList)
                 .sign(Algorithm.HMAC256(sign))
         }
 
         /**
          * 解析token
          */
-        private fun decrypt(token: String): MutableMap<String, Claim> {
+        fun decrypt(token: String): MutableMap<String, Claim> {
             if (StringUtils.isBlank(token)) {
                 return Maps.newHashMap<String, Claim>()
             }
@@ -113,8 +112,15 @@ class JwtHelper {
         /**
          * 获取
          */
-        fun getClaim(token: String, key: String): Any? {
+        private fun getClaim(token: String, key: String): Any? {
             return JWT.decode(token).claims[key]
+        }
+
+        /**
+         * 获取
+         */
+        fun <T> getClaim(token: String, key: String, clazz: Class<T>): T? {
+            return getClaim(token, key)?.let { JSON.parseObject(getClaim(token, key).toString(), clazz) }
         }
 
     }

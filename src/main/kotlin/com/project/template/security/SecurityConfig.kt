@@ -41,10 +41,10 @@ open class SecurityConfig(
      */
     @Bean
     open fun formLoginFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.securityMatcher("/auth/login")
+        http.securityMatcher("/api/v1/auth/login")
             .authorizeHttpRequests { it.anyRequest().authenticated() }
             .formLogin {
-                it.loginProcessingUrl("/auth/login")
+                it.loginProcessingUrl("/api/v1/auth/login")
                 it.successHandler(UsernameAuthenticationSuccessHandler())
             }
             .csrf { it.disable() }
