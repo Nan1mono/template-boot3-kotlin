@@ -10,6 +10,7 @@ import com.google.common.collect.Maps
 import com.project.template.com.project.template.common.log.annotation.Slf4j2
 import com.project.template.com.project.template.common.log.annotation.Slf4j2.Companion.log
 import com.project.template.security.core.entity.SecurityUserDetail
+import com.project.template.security.exception.AuthException
 import com.project.template.security.exception.enum.AuthFailEnum
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
@@ -54,7 +55,7 @@ class JwtHelper {
                 .withClaim(NICKNAME, securityUserDetail.user.nickname ?: "")
                 .withClaim(REAL_NAME, securityUserDetail.user.realName ?: "")
                 .withClaim(ROLE_LIST, JSON.toJSONString(securityUserDetail.roleList))
-                .withClaim(AUTHORITIES,  JSON.toJSONString(securityUserDetail.authorities))
+                .withClaim(AUTHORITIES, JSON.toJSONString(securityUserDetail.authorities))
                 .withClaim(MENUS, JSON.toJSONString(securityUserDetail.menuList))
                 .sign(Algorithm.HMAC256(sign))
         }
@@ -107,6 +108,13 @@ class JwtHelper {
          */
         fun getUserId(token: String): Long {
             return JWT.decode(token).subject.toLong()
+        }
+
+        /**
+         * 获取账户
+         */
+        fun getUsername(token: String): String {
+            return (JWT.decode(token).claims[USERNAME]?:throw AuthException(AuthFailEnum.USER_USERNAME_EMPTY)).asString()
         }
 
         /**
