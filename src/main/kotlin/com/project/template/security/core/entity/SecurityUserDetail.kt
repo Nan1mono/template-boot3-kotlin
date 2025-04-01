@@ -3,8 +3,6 @@ package com.project.template.security.core.entity
 import com.google.common.collect.Lists
 import com.project.template.module.system.entity.User
 import com.project.template.security.constant.UserStatusEnum
-import com.project.template.security.exception.enum.AuthFailEnum
-import org.apache.commons.lang3.StringUtils
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -22,9 +20,9 @@ class SecurityUserDetail(
     private var username: String,
     private var password: String?,
     var token: String = "",
-    var roleList: ArrayList<SecurityUserRole> = Lists.newArrayList<SecurityUserRole>(),
-    var authorities: ArrayList<SimpleGrantedAuthority> = Lists.newArrayList(),
-    var menuList: ArrayList<SecurityRoleMenu> = Lists.newArrayList()
+    var roleList: List<SecurityUserRole> = Lists.newArrayList<SecurityUserRole>(),
+    var authorities: List<SimpleGrantedAuthority> = Lists.newArrayList(),
+    var menuList: List<SecurityRoleMenu> = Lists.newArrayList()
 ) : UserDetails {
 
     override fun getAuthorities(): Collection<GrantedAuthority> {

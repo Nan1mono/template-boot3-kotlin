@@ -16,9 +16,9 @@ class AuthSuccessResponse(
         fun build(token: String): AuthSuccessResponse {
             return AuthSuccessResponse().apply {
                 userId = JwtHelper.getUserId(token)
-                username = JwtHelper.getClaim(token, JwtHelper.USERNAME, String::class.java)
-                nickname = JwtHelper.getClaim(token, JwtHelper.NICKNAME, String::class.java)
-                realName = JwtHelper.getClaim(token, JwtHelper.REAL_NAME, String::class.java)
+                username = JwtHelper.getClaim(token, JwtHelper.USERNAME)
+                nickname = JwtHelper.getClaim(token, JwtHelper.NICKNAME)
+                realName = JwtHelper.getClaim(token, JwtHelper.REAL_NAME)
                 roleList = JwtHelper.getClaim(token, JwtHelper.ROLE_LIST, ArrayList::class.java)
                 menuList = JwtHelper.getClaim(token, JwtHelper.MENUS, ArrayList::class.java)
                 authorities = JwtHelper.getClaim(token, JwtHelper.AUTHORITIES, ArrayList::class.java)

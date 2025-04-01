@@ -110,14 +110,14 @@ open class AuthenticationProvider(
         }
         // 进行状态校验
         this.additionalAuthenticationChecks(securityUserDetail, authentication)
+        // 获取用户角色信息
+        securityDataService.buildPermission(securityUserDetail)
         // 校验通过，开始签发token
         securityUserDetail = securityUserDetail.apply {
             token = securityUserDetail.user.run {
                 JwtHelper.createToken(securityUserDetail, tokenExpiration, tokenSignKey)
             }
         }
-        // 获取用户角色信息
-        securityDataService.buildPermission(securityUserDetail)
         // 生成权限信息体
         val authenticated = UsernamePasswordAuthenticationToken.authenticated(
             securityUserDetail.token,

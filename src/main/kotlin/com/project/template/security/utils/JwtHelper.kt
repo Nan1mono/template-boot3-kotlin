@@ -53,9 +53,9 @@ class JwtHelper {
                 .withClaim(USERNAME, securityUserDetail.user.username)
                 .withClaim(NICKNAME, securityUserDetail.user.nickname ?: "")
                 .withClaim(REAL_NAME, securityUserDetail.user.realName ?: "")
-                .withClaim(ROLE_LIST, securityUserDetail.roleList)
-                .withClaim(AUTHORITIES, securityUserDetail.authorities)
-                .withClaim(MENUS, securityUserDetail.menuList)
+                .withClaim(ROLE_LIST, JSON.toJSONString(securityUserDetail.roleList))
+                .withClaim(AUTHORITIES,  JSON.toJSONString(securityUserDetail.authorities))
+                .withClaim(MENUS, JSON.toJSONString(securityUserDetail.menuList))
                 .sign(Algorithm.HMAC256(sign))
         }
 
@@ -112,15 +112,15 @@ class JwtHelper {
         /**
          * 获取
          */
-        private fun getClaim(token: String, key: String): Any? {
-            return JWT.decode(token).claims[key]
+        fun getClaim(token: String, key: String): String? {
+            return JWT.decode(token).claims[key]?.asString()
         }
 
         /**
          * 获取
          */
         fun <T> getClaim(token: String, key: String, clazz: Class<T>): T? {
-            return getClaim(token, key)?.let { JSON.parseObject(getClaim(token, key).toString(), clazz) }
+            return getClaim(token, key)?.let { JSON.parseObject(it, clazz) }
         }
 
     }
