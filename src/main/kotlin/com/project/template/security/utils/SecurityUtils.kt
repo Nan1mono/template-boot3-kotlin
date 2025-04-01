@@ -1,7 +1,5 @@
 package com.project.template.security.utils
 
-import com.project.template.module.system.entity.User
-import com.project.template.security.core.entity.SecurityUserDetail
 import org.apache.commons.lang3.StringUtils
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -20,14 +18,6 @@ class SecurityUtils {
         private val PASSWORD_ENCODER = BCryptPasswordEncoder()
 
         /**
-         * security上下文获取用户登录信息
-         */
-        fun getUserDetail(): SecurityUserDetail {
-            val authentication = SecurityContextHolder.getContext().authentication
-            return authentication.principal as SecurityUserDetail
-        }
-
-        /**
          * 清楚security上下文用户数据
          */
         fun clearUser() {
@@ -37,15 +27,8 @@ class SecurityUtils {
         /**
          * 从security上下文中获取原生user
          */
-        fun getUser(): User {
-            return getUserDetail().user
-        }
-
-        /**
-         * 从security上下文中获取token
-         */
-        fun getToken(): String {
-            return getUserDetail().token
+        fun getUserId(): Long {
+            return JwtHelper.getUserId(SecurityContextHolder.getContext().authentication.principal.toString())
         }
 
         /**
