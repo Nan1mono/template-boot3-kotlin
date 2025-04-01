@@ -18,7 +18,7 @@ class UsernameAuthenticationSuccessHandler : AuthenticationSuccessHandler {
         // 校验结果
         val token = authentication.principal.toString()
         //创建结果对象
-        val successResponse = AuthSuccessResponse.build(token)
+        val successResponse = AuthSuccessResponse.buildWithUsernameToken(token)
         //转换成json字符串
         val result = JSON.toJSONString(Result2.success(successResponse))
         //返回响应

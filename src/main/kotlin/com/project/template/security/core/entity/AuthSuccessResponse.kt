@@ -13,7 +13,7 @@ class AuthSuccessResponse(
     var menuList: ArrayList<*>? = null
 ) {
     companion object {
-        fun build(token: String): AuthSuccessResponse {
+        fun buildWithUsernameToken(token: String): AuthSuccessResponse {
             return AuthSuccessResponse(
                 token,
                 JwtHelper.getUserId(token),
