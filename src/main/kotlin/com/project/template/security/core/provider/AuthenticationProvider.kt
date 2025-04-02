@@ -37,9 +37,6 @@ open class AuthenticationProvider(
     @Value("\${template.token.sign-key:nan1mono}")
     private val tokenSignKey: String,
 
-    @Value("\${template.security.button-enable:true}")
-    private val isFind: Boolean,
-
     @Value("\${template.pass-error.enable:false}")
     private val isCheckLock: Boolean,
 

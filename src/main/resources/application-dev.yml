@@ -41,8 +41,6 @@ template:
     # 过期时间配置(秒)(default:25200)
     expiration: 86400
   security:
-    # 是否开启按钮查询权限(default:true)
-    button-enable: true
     # 路由白名单配置(default:null)
     allow:
       uri: /v3/api-docs/**,/swagger-ui/**,/favicon.ico,/test/public/**,/auth/**
