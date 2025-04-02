@@ -9,6 +9,10 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 
 
+/**
+ * 登录成功处理器
+ * 这里将控制登录成功之后的返回
+ */
 class UsernameAuthenticationSuccessHandler : AuthenticationSuccessHandler {
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,

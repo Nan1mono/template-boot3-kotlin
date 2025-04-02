@@ -16,6 +16,11 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
+/**
+ * 请求认证处理器
+ * 这里会处理白名单和登录登出以外的请求认证
+ * 认证不通过的都将会被定向到PermissionAuthenticationFailPoint
+ */
 @Component
 class PermissionFilter(
     @Value("\${template.token.sign-key:nan1mono}")

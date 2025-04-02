@@ -6,5 +6,6 @@ enum class ResultCodeEnum(
 ) {
     SUCCESS(200, "success"),
     FAIL(201, "fail"),
+    AUTH_FAIL(401, "auth fail"),
     UNKNOWN_ERROR(500, "UNKNOWN_ERROR"),
 }

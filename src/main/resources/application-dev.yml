@@ -45,7 +45,7 @@ template:
     button-enable: true
     # 路由白名单配置(default:null)
     allow:
-      uri: /v3/api-docs/**,/swagger-ui/**,/login/auth,/favicon.ico,/test/public/**,/auth/login
+      uri: /v3/api-docs/**,/swagger-ui/**,/favicon.ico,/test/public/**,/auth/**
   # 密码试错设定
   pass-error:
     # 是否开启试错限制(default:false)

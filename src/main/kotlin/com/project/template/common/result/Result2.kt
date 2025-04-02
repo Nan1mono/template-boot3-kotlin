@@ -41,16 +41,16 @@ sealed class Result2<T> {
             return Fail(data = data)
         }
 
-        fun <T> fail(code: Int, message: String, data: T?): Result2<T> {
-            return Fail(code = code, message = message, data = data)
+        fun <T> fail(enum: ResultCodeEnum, data: T?): Result2<T> {
+            return Fail(code = enum.code, message = enum.message, data = data)
         }
 
-        fun <T> fail(code: Int, message: String): Result2<T> {
-            return Fail(code = code, message = message, data = null)
+        fun <T> fail(enum: ResultCodeEnum): Result2<T> {
+            return Fail(code = enum.code, message = enum.message, data = null)
         }
 
-        fun <T> fail(message: String): Result2<T> {
-            return Fail(code = ResultCodeEnum.FAIL.code, message = message, data = null)
+        fun <T> authFail(data: T?): Result2<T> {
+            return Fail(code = ResultCodeEnum.AUTH_FAIL.code, message = ResultCodeEnum.AUTH_FAIL.message, data = data)
         }
     }
 
