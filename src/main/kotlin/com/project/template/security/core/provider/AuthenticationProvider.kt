@@ -18,6 +18,8 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.time.LocalDateTime
 
 /**
@@ -98,11 +100,14 @@ open class AuthenticationProvider(
      * 校验账号密码，状态等
      */
     override fun authenticate(authentication: Authentication): Authentication {
+        // 获取请求ip
+        val request = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
         // 校验密码，因为登陆时获取的是暗文密码，所以比对时需要将密码加密后比对
         val presentPassword = authentication.credentials.toString()
         val username = authentication.name
         // 数据库查询获取用户信息
-        var securityUserDetail = this.retrieveUser(username, authentication as UsernamePasswordAuthenticationToken)
+        val securityUserDetail = this.retrieveUser(username, authentication as UsernamePasswordAuthenticationToken)
+        securityUserDetail.ip = request.request.remoteAddr
         // 开始匹配密码（加密后）
         if (!SecurityUtils.matchPassword(presentPassword, securityUserDetail.password)) {
             // 如果密码不匹配，将开始进行计数，当达到最大锁定次数时，账号锁定

@@ -22,7 +22,8 @@ class SecurityUserDetail(
     var token: String = "",
     var roleList: List<SecurityUserRole> = Lists.newArrayList<SecurityUserRole>(),
     var authorities: List<SimpleGrantedAuthority> = Lists.newArrayList(),
-    var menuList: List<SecurityRoleMenu> = Lists.newArrayList()
+    var menuList: List<SecurityRoleMenu> = Lists.newArrayList(),
+    var ip: String? = ""
 ) : UserDetails {
 
     override fun getAuthorities(): Collection<GrantedAuthority> {
@@ -53,7 +54,7 @@ class SecurityUserDetail(
         return user.isLocked == UserStatusEnum.NORMAL.code
     }
 
-    fun cleanPassword(){
+    fun cleanPassword() {
         this.user.password = null
         this.password = null
     }

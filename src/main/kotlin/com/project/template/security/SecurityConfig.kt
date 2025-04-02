@@ -5,6 +5,7 @@ import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
 import com.project.template.security.core.entity.SecurityUserDetail
 import com.project.template.security.core.filter.PermissionFilter
+import com.project.template.security.core.handler.PermissionAuthenticationFailPoint
 import com.project.template.security.core.handler.UsernameAuthenticationSuccessHandler
 import com.project.template.security.core.validator.JwtIssuerValidator
 import com.project.template.security.exception.enum.AuthFailEnum
@@ -62,6 +63,7 @@ open class SecurityConfig(
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http.csrf { it.disable() }
             .authorizeHttpRequests { it.requestMatchers(*uri.toTypedArray()).permitAll().anyRequest().authenticated() }
+            .exceptionHandling{it.authenticationEntryPoint(PermissionAuthenticationFailPoint())}
             .addFilterAt(permissionFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }

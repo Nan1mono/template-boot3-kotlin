@@ -42,16 +42,25 @@ class PermissionFilter(
             || !JwtHelper.verify(token, sign)
             || !JwtHelper.verify(cacheToken, sign)
         ) {
+            // 清空redis
+            redisUtils.del(SecurityUtils.buildUserCacheKey(JwtHelper.getUserId(token)))
             throw BadCredentialsException(AuthFailEnum.TOKEN_EXPIRED.buildMessage())
         }
         // 判断账号是否锁定，是否启用
         val auth = AuthSuccessResponse.buildWithUsernameToken(token)
         val cacheAuth = AuthSuccessResponse.buildWithUsernameToken(cacheToken)
         if (!auth.isNonLocked || !cacheAuth.isNonLocked) {
+            redisUtils.del(SecurityUtils.buildUserCacheKey(JwtHelper.getUserId(token)))
             throw BadCredentialsException(AuthFailEnum.USER_LOCKED.buildMessage())
         }
         if (!auth.isEnabled || !cacheAuth.isEnabled) {
+            redisUtils.del(SecurityUtils.buildUserCacheKey(JwtHelper.getUserId(token)))
             throw BadCredentialsException(AuthFailEnum.USER_DISABLED_OR_DELETED.buildMessage())
+        }
+        // 校验tokenIp，缓存Ip，和请求Ip是否一直，如果不一致为异常
+        if (auth.remoteIp != cacheAuth.remoteIp || auth.remoteIp != request.remoteAddr || cacheAuth.remoteIp != request.remoteAddr) {
+            redisUtils.del(SecurityUtils.buildUserCacheKey(JwtHelper.getUserId(token)))
+            throw BadCredentialsException(AuthFailEnum.AUTH_ENVIRONMENT_ERROR.buildMessage())
         }
         // 认证通过，添加上下文西信息
         SecurityContextHolder.getContext().authentication =

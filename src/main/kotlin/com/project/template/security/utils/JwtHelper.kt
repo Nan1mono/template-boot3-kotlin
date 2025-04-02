@@ -29,6 +29,7 @@ class JwtHelper {
         const val MENUS = "menus"
         const val IS_NON_LOCKED = "isNonLocked"
         const val IS_ENABLED = "isEnable"
+        const val REMOTE_IP = "remoteIp"
 
         // 设置发行者
         private const val ISSUER = "template-trust-user"
@@ -61,6 +62,7 @@ class JwtHelper {
                 .withClaim(MENUS, JSON.toJSONString(securityUserDetail.menuList))
                 .withClaim(IS_NON_LOCKED, securityUserDetail.isAccountNonLocked)
                 .withClaim(IS_ENABLED, securityUserDetail.isEnabled)
+                .withClaim(REMOTE_IP, securityUserDetail.ip)
                 .sign(Algorithm.HMAC256(sign))
         }
 

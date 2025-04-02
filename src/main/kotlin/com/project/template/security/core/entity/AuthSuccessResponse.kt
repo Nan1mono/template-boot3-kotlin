@@ -11,6 +11,7 @@ class AuthSuccessResponse(
     var username: String,
     var isNonLocked: Boolean,
     var isEnabled: Boolean,
+    var remoteIp: String,
     var nickname: String? = null,
     var realName: String? = null,
     var roleList: ArrayList<*>? = null,
@@ -25,6 +26,7 @@ class AuthSuccessResponse(
                 JwtHelper.getClaim(token, JwtHelper.USERNAME)?.asString() ?: "",
                 JwtHelper.getClaim(token, JwtHelper.IS_NON_LOCKED)?.asBoolean() ?: false,
                 JwtHelper.getClaim(token, JwtHelper.IS_ENABLED)?.asBoolean() ?: false,
+                JwtHelper.getClaim(token, JwtHelper.REMOTE_IP)?.asString() ?: ""
             ).apply {
                 nickname = JwtHelper.getClaim(token, JwtHelper.NICKNAME)?.asString()
                 realName = JwtHelper.getClaim(token, JwtHelper.REAL_NAME)?.asString()

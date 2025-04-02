@@ -15,5 +15,8 @@ enum class AuthFailEnum(override val number: Int, override val code: String, ove
     USER_LOCKED(3009, "sec-3009", "用户被锁定"),
     PASSWORD_EXPIRED(30010, "sec-30010", "密码已过期"),
     USER_DISABLED_OR_DELETED(30011, "sec-30011", "用户被禁用或已删除"),
+    USERNAME_OR_PASSWORD_EMPTY(30012, "sec-30012", "用户名或密码为空"),
+    AUTH_FAIL(30013, "sec-30013", "认证失败"),
+    AUTH_ENVIRONMENT_ERROR(30014, "sec-30014", "认证环境异常"),
     ;
 }
