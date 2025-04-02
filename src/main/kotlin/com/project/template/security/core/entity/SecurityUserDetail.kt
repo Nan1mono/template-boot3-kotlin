@@ -50,7 +50,7 @@ class SecurityUserDetail(
      * @return [Boolean]
      */
     override fun isAccountNonLocked(): Boolean {
-        return user.status == UserStatusEnum.ENABLED.code
+        return user.isLocked == UserStatusEnum.NORMAL.code
     }
 
     fun cleanPassword(){

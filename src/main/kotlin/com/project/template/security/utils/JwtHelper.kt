@@ -27,6 +27,8 @@ class JwtHelper {
         const val ROLE_LIST = "roles"
         const val AUTHORITIES = "authorities"
         const val MENUS = "menus"
+        const val IS_NON_LOCKED = "isNonLocked"
+        const val IS_ENABLED = "isEnable"
 
         // 设置发行者
         private const val ISSUER = "template-trust-user"
@@ -57,6 +59,8 @@ class JwtHelper {
                 .withClaim(ROLE_LIST, JSON.toJSONString(securityUserDetail.roleList))
                 .withClaim(AUTHORITIES, JSON.toJSONString(securityUserDetail.authorities))
                 .withClaim(MENUS, JSON.toJSONString(securityUserDetail.menuList))
+                .withClaim(IS_NON_LOCKED, securityUserDetail.isAccountNonLocked)
+                .withClaim(IS_ENABLED, securityUserDetail.isEnabled)
                 .sign(Algorithm.HMAC256(sign))
         }
 
@@ -88,7 +92,7 @@ class JwtHelper {
                 // 校验器
                 JWT.require(algorithm).withIssuer(ISSUER).build().verify(token).run {
                     val expiresAt = this.expiresAt
-                    if (expiresAt != null && expiresAt.before(Date())) {
+                    if (expiresAt != null && expiresAt.after(Date())) {
                         return true
                     }
                     log.error(AuthFailEnum.TOKEN_EXPIRED.buildMessage())
@@ -114,21 +118,22 @@ class JwtHelper {
          * 获取账户
          */
         fun getUsername(token: String): String {
-            return (JWT.decode(token).claims[USERNAME]?:throw AuthException(AuthFailEnum.USER_USERNAME_EMPTY)).asString()
+            return (JWT.decode(token).claims[USERNAME]
+                ?: throw AuthException(AuthFailEnum.USER_USERNAME_EMPTY)).asString()
         }
 
         /**
          * 获取
          */
-        fun getClaim(token: String, key: String): String? {
-            return JWT.decode(token).claims[key]?.asString()
+        fun getClaim(token: String, key: String): Claim? {
+            return JWT.decode(token).claims[key]
         }
 
         /**
          * 获取
          */
         fun <T> getClaim(token: String, key: String, clazz: Class<T>): T? {
-            return getClaim(token, key)?.let { JSON.parseObject(it, clazz) }
+            return getClaim(token, key)?.let { JSON.parseObject(it.asString(), clazz) }
         }
 
     }

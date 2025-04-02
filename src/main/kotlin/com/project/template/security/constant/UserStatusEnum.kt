@@ -6,8 +6,8 @@ enum class UserStatusEnum(
 ) {
     DELETED(1, "已删除"),
     UNDELETED(0, "未删除"),
-    NORMAL(1, "正常"),
+    NORMAL(0, "正常"),
     LOCKED(1, "锁定"),
-    ENABLED(0, "启用"),
+    ENABLED(1, "启用"),
     DISABLED(0, "禁用");
 }

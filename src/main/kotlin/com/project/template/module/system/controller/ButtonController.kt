@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2025-03-21
  */
 @RestController
-@RequestMapping("/button")
+@RequestMapping("/api/v1/button")
 class ButtonController
 

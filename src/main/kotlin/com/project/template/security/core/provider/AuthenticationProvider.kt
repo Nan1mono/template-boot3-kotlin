@@ -10,6 +10,7 @@ import com.project.template.security.exception.enum.AuthFailEnum
 import com.project.template.security.service.SecurityDataService
 import com.project.template.security.utils.JwtHelper
 import com.project.template.security.utils.SecurityUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider
@@ -112,11 +113,20 @@ open class AuthenticationProvider(
         this.additionalAuthenticationChecks(securityUserDetail, authentication)
         // 获取用户角色信息
         securityDataService.buildPermission(securityUserDetail)
-        // 校验通过，开始签发token
-        securityUserDetail = securityUserDetail.apply {
-            token = securityUserDetail.user.run {
-                JwtHelper.createToken(securityUserDetail, tokenExpiration, tokenSignKey)
-            }
+        // 处于安全考虑将用户密码设置为空
+        securityUserDetail.cleanPassword()
+        // 查询缓存是否存在，如果缓存存在，会刷新过期时间，这里是用于确保token的唯一性
+        val cacheToken = redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id)]
+        // 如果缓存不存在，则将token放到缓存中
+        if (cacheToken == null || StringUtils.isBlank(cacheToken.toString())) {
+            // 校验通过，开始签发token
+            securityUserDetail.token = JwtHelper.createToken(securityUserDetail, tokenExpiration, tokenSignKey)
+            redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), securityUserDetail.token] =
+                tokenExpiration
+        } else {
+            // 如果缓存存在，不再重新签发token，而是将token重新设置过期时间
+            securityUserDetail.token = cacheToken.toString()
+            redisUtils.expire(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), tokenExpiration)
         }
         // 生成权限信息体
         val authenticated = UsernamePasswordAuthenticationToken.authenticated(
@@ -124,16 +134,6 @@ open class AuthenticationProvider(
             securityUserDetail.token,
             securityUserDetail.authorities
         )
-        // 处于安全考虑将用户密码设置为空
-        securityUserDetail.cleanPassword()
-        // 查询缓存是否存在，如果缓存存在，会刷新过期时间
-        val cacheUserDetail = redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id)]
-        // 如果缓存不存在，则将数据放到缓存中
-        if (cacheUserDetail == null) {
-            redisUtils[SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), securityUserDetail.token] = tokenExpiration
-        } else {
-            redisUtils.expire(SecurityUtils.buildUserCacheKey(securityUserDetail.user.id), tokenExpiration)
-        }
         // 清除redisLock
         redisUtils.del(LOCKED_KEY + securityUserDetail.user.id)
         return authenticated

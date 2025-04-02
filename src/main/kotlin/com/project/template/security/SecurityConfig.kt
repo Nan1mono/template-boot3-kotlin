@@ -4,6 +4,7 @@ import com.project.template.common.cache.RedisUtils
 import com.project.template.module.system.entity.User
 import com.project.template.module.system.service.UserService
 import com.project.template.security.core.entity.SecurityUserDetail
+import com.project.template.security.core.filter.PermissionFilter
 import com.project.template.security.core.handler.UsernameAuthenticationSuccessHandler
 import com.project.template.security.core.validator.JwtIssuerValidator
 import com.project.template.security.exception.enum.AuthFailEnum
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -33,7 +35,8 @@ open class SecurityConfig(
     @Value("\${template.token.sign-key:nan1mono}")
     private val sign: String,
     private val userService: UserService,
-    private val redisUtils: RedisUtils
+    private val redisUtils: RedisUtils,
+    private val permissionFilter: PermissionFilter
 ) {
 
     /**
@@ -59,7 +62,7 @@ open class SecurityConfig(
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http.csrf { it.disable() }
             .authorizeHttpRequests { it.requestMatchers(*uri.toTypedArray()).permitAll().anyRequest().authenticated() }
-            .oauth2ResourceServer { oauth2 -> oauth2.jwt { jwt -> jwt.decoder(jwtDecoder()) } }
+            .addFilterAt(permissionFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
 

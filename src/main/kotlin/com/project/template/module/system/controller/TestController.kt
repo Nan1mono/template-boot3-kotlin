@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/api/v1/test")
 @Tag(name = "测试接口")
 class TestController {
 
