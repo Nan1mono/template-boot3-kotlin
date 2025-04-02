@@ -1,5 +1,6 @@
 package com.project.template.security.core.entity
 
+import com.alibaba.fastjson2.util.DateUtils
 import com.google.common.collect.Lists
 import com.project.template.module.system.entity.User
 import com.project.template.security.constant.UserStatusEnum
@@ -52,6 +53,13 @@ class SecurityUserDetail(
      */
     override fun isAccountNonLocked(): Boolean {
         return user.isLocked == UserStatusEnum.NORMAL.code
+    }
+
+    /**
+     * 账户锁定时间
+     */
+    fun getLockedDateTime(): String? {
+        return user.lockDatetime?.let { DateUtils.format(it, "yyyy-MM-dd HH:mm:ss") }
     }
 
     fun cleanPassword() {

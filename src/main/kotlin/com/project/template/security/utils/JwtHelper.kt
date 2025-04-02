@@ -30,6 +30,7 @@ class JwtHelper {
         const val IS_NON_LOCKED = "isNonLocked"
         const val IS_ENABLED = "isEnable"
         const val REMOTE_IP = "remoteIp"
+        const val LOCK_DATE_TIME = "lockDateTime"
 
         // 设置发行者
         private const val ISSUER = "template-trust-user"
@@ -63,6 +64,7 @@ class JwtHelper {
                 .withClaim(IS_NON_LOCKED, securityUserDetail.isAccountNonLocked)
                 .withClaim(IS_ENABLED, securityUserDetail.isEnabled)
                 .withClaim(REMOTE_IP, securityUserDetail.ip)
+                .withClaim(LOCK_DATE_TIME, securityUserDetail.getLockedDateTime())
                 .sign(Algorithm.HMAC256(sign))
         }
 

@@ -14,6 +14,7 @@ class AuthSuccessResponse(
     var remoteIp: String,
     var nickname: String? = null,
     var realName: String? = null,
+    var lockDateTime: String? = null,
     var roleList: ArrayList<*>? = null,
     var authorities: ArrayList<*>? = null,
     var menuList: ArrayList<*>? = null
@@ -30,6 +31,7 @@ class AuthSuccessResponse(
             ).apply {
                 nickname = JwtHelper.getClaim(token, JwtHelper.NICKNAME)?.asString()
                 realName = JwtHelper.getClaim(token, JwtHelper.REAL_NAME)?.asString()
+                lockDateTime = JwtHelper.getClaim(token, JwtHelper.LOCK_DATE_TIME)?.asString()
                 roleList = JwtHelper.getClaim(token, JwtHelper.ROLE_LIST, ArrayList::class.java)
                 menuList = JwtHelper.getClaim(token, JwtHelper.MENUS, ArrayList::class.java)
                 authorities = JwtHelper.getClaim(token, JwtHelper.AUTHORITIES, ArrayList::class.java)
