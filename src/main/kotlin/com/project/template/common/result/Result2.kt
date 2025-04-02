@@ -37,6 +37,10 @@ sealed class Result2<T> {
             return Success(data = data)
         }
 
+        fun success(): Result2<Unit> {
+            return Success(data = null)
+        }
+
         fun <T> fail(data: T?): Result2<T> {
             return Fail(data = data)
         }
